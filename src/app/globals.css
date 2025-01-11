@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Windows XP specific styles */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Animations */
+@keyframes windowOpen {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes startMenuOpen {
+  from {
+    transform: translateY(100%) scaleY(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes windowMinimize {
+  to {
+    transform: scale(0.7) translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes taskbarButtonPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* Animation classes */
+.animate-window-open {
+  animation: windowOpen 0.2s ease-out;
+}
+
+.start-menu {
+  animation: startMenuOpen 0.2s ease-out;
+  transform-origin: bottom;
+}
+
+.minimize-window {
+  animation: windowMinimize 0.2s ease-in forwards;
+}
+
+.taskbar-button-press {
+  animation: taskbarButtonPress 0.2s ease-in-out;
+}
+
+/* Windows XP specific utilities */
+.text-shadow {
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.win-select {
+  user-select: text;
+}
+
+.win-select::selection {
+  background: #316AC5;
+  color: white;
+}
+
+/* Windows XP window borders */
+.window-border {
+  border: 1px solid #1E5799;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 
+    inset 1px 1px 0 #fff,
+    2px 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Windows XP button styles */
+.xp-button {
+  background: linear-gradient(180deg, #fff 0%, #ecebe5 100%);
+  border: 5px solid #003c74;
+  box-shadow: 
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #707070;
+}
+
+.xp-button:active {
+  background: linear-gradient(180deg, #cce3fc 0%, #84b5f3 100%);
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,0.2);
+}.start-menu {
+  animation: startMenuOpen 0.2s ease-out;
+  transform-origin: bottom;
+}
+
+@keyframes startMenuOpen {
+  from {
+    transform: translateY(100%) scaleY(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
