@@ -1,9 +1,49 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react';
-import { User, Code, Mail, Briefcase } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Code, Mail } from 'lucide-react';
+import Image from 'next/image';
 
-const WinXPWindow = ({ 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface Size {
+  width: number;
+  height: number;
+}
+
+interface WindowProps {
+  title: string;
+  isActive: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  onMinimize: () => void;
+  onMaximize: () => void;
+  position: Position;
+  onPositionChange: (position: Position) => void;
+  isMaximized: boolean;
+  icon: string;
+  defaultSize?: Size;
+}
+
+interface Icon {
+  id: string;
+  title: string;
+  iconSrc: string;
+  content: React.ReactNode;
+}
+
+interface WindowPositions {
+  [key: string]: Position;
+}
+
+interface IsMaximizedState {
+  [key: string]: boolean;
+}
+
+const WinXPWindow: React.FC<WindowProps> = ({ 
   title, 
   isActive, 
   onClose, 
@@ -16,93 +56,98 @@ const WinXPWindow = ({
   icon,
   defaultSize = { width: 600, height: 400 }
 }) => {
-  const windowRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState(defaultSize);
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeDirection, setResizeDirection] = useState(null);
-  const [lastClickTime, setLastClickTime] = useState(0);
+  const windowRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
+  const [size, setSize] = useState<Size>(defaultSize);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const [resizeDirection, setResizeDirection] = useState<string | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<number>(0);
 
-  const handleTitleBarClick = (e) => {
+  const handleTitleBarClick = () => {
     const currentTime = new Date().getTime();
-    if (currentTime - lastClickTime < 300) { // Double click
+    if (currentTime - lastClickTime < 300) {
       onMaximize();
     }
     setLastClickTime(currentTime);
   };
 
-  const startDrag = (e) => {
+  const startDrag = (e: React.MouseEvent) => {
     if (isMaximized) return;
-    if (e.target.closest('.window-controls')) return;
+    if (e.target instanceof Element && e.target.closest('.window-controls')) return;
     
     setIsDragging(true);
-    const rect = windowRef.current.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+    const rect = windowRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
   };
 
-  const onDrag = (e) => {
+  const onDrag = useCallback((e: MouseEvent) => {
     if (!isDragging || isMaximized) return;
     
     const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - size.width));
     const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - size.height - 40));
     
     onPositionChange({ x: newX, y: newY });
-  };
-
-  const stopDrag = () => {
-    setIsDragging(false);
-  };
-
-  const startResize = (e, direction) => {
-    if (isMaximized) return;
-    e.stopPropagation();
-    setIsResizing(true);
-    setResizeDirection(direction);
-  };
-
-  const onResize = (e) => {
-    if (!isResizing || isMaximized) return;
+  }, [isDragging, isMaximized, dragOffset.x, dragOffset.y, size.width, size.height, onPositionChange]);
+  
+  const onResize = useCallback((e: MouseEvent) => {
+    if (!isResizing || isMaximized || !windowRef.current) return;
     
     const rect = windowRef.current.getBoundingClientRect();
     let newWidth = size.width;
     let newHeight = size.height;
-
-    if (resizeDirection.includes('e')) {
+  
+    if (resizeDirection?.includes('e')) {
       newWidth = Math.max(300, Math.min(e.clientX - rect.left, window.innerWidth - rect.left));
     }
-    if (resizeDirection.includes('s')) {
+    if (resizeDirection?.includes('s')) {
       newHeight = Math.max(200, Math.min(e.clientY - rect.top, window.innerHeight - rect.top - 40));
     }
-
+  
     setSize({
       width: newWidth,
       height: newHeight
     });
-  };
+  }, [isResizing, isMaximized, resizeDirection, size.width, size.height]);
 
-  const stopResize = () => {
+  const stopResize = useCallback(() => {
     setIsResizing(false);
     setResizeDirection(null);
-  };
+  }, []);
+  const stopDrag = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
-  useEffect(() => {
-    if (isDragging || isResizing) {
-      window.addEventListener('mousemove', isDragging ? onDrag : onResize);
-      window.addEventListener('mouseup', isDragging ? stopDrag : stopResize);
+  const startResize = useCallback((e: React.MouseEvent, direction: string) => {
+    if (isMaximized) return;
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+  }, [isMaximized]);
+useEffect(() => {
+  if (isDragging || isResizing) {
+    const handleMouseMove = isDragging ? onDrag : onResize;
+    const handleMouseUp = isDragging ? stopDrag : stopResize;
 
-      return () => {
-        window.removeEventListener('mousemove', isDragging ? onDrag : onResize);
-        window.removeEventListener('mouseup', isDragging ? stopDrag : stopResize);
-      };
-    }
-  }, [isDragging, isResizing]);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }
+}, [isDragging, isResizing, onDrag, onResize, stopDrag, stopResize]);
 
   const handleMinimize = () => {
     const element = windowRef.current;
+    if (!element) return;
+    
     element.classList.add('minimize-window');
     setTimeout(() => {
       onMinimize();
@@ -140,7 +185,7 @@ const WinXPWindow = ({
         onClick={handleTitleBarClick}
       >
         <div className="flex items-center gap-2">
-          <img src={icon} alt="" className="w-4 h-4 pixelated" />
+          <Image src={icon} alt={`${title} icon`} width={16} height={16} className="pixelated" />
           <span className="text-white text-sm font-bold">{title}</span>
         </div>
         <div className="flex gap-[1px] window-controls">
@@ -148,25 +193,19 @@ const WinXPWindow = ({
             onClick={handleMinimize}
             className="w-[22px] h-[22px] flex items-center justify-center bg-[#D1D1D1] hover:bg-[#E5E5E5] active:bg-[#CCCCCC] border border-[#FFFFFF99] rounded-sm"
           >
-            <span className="text-black text-lg ">
-              <img src="/icons/Minimize.png" className="w-full h-full" draggable="false" />
-              </span>
+            <Image src="/icons/Minimize.png" alt="Minimize" width={22} height={22} className="w-full h-full" draggable={false} />
           </button>
           <button 
             onClick={onMaximize}
             className="w-[22px] h-[22px] flex items-center justify-center bg-[#D1D1D1] hover:bg-[#E5E5E5] active:bg-[#CCCCCC] border border-[#FFFFFF99] rounded-sm"
           >
-            <span className="text-black text-sm"> 
-            <img src="/icons/Maximize.png" className="w-full h-full" draggable="false" />
-              </span>
+            <Image src="/icons/Maximize.png" alt="Maximize" width={22} height={22} className="w-full h-full" draggable={false} />
           </button>
           <button 
             onClick={onClose}
             className="w-[22px] h-[22px] flex items-center justify-center bg-[#E81123] hover:bg-[#F65B69] active:bg-[#C13033] border border-[#FFFFFF99] rounded-sm"
           >
-            <span className="text-white text-lg">
-              <img src="/icons/Exit.png" className="w-full h-full " draggable="false" />
-            </span>
+            <Image src="/icons/Exit.png" alt="Close" width={22} height={22} className="w-full h-full" draggable={false} />
           </button>
         </div>
       </div>
@@ -204,21 +243,22 @@ const WinXPWindow = ({
     </div>
   );
 };
-const WinXPPortfolio = () => {
-  const [openWindows, setOpenWindows] = useState([]);
-  const [activeWindow, setActiveWindow] = useState(null);
-  const [showStartMenu, setShowStartMenu] = useState(false);
-  const [currentTime, setCurrentTime] = useState('');
-  const [windowPositions, setWindowPositions] = useState({});
-  const [isMaximized, setIsMaximized] = useState({});
-  const [minimizedWindows, setMinimizedWindows] = useState([]);
 
-  // Handle click outside start menu
+const WinXPPortfolio: React.FC = () => {
+  const [openWindows, setOpenWindows] = useState<string[]>([]);
+  const [activeWindow, setActiveWindow] = useState<string | null>(null);
+  const [showStartMenu, setShowStartMenu] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [windowPositions, setWindowPositions] = useState<WindowPositions>({});
+  const [isMaximized, setIsMaximized] = useState<IsMaximizedState>({});
+  const [minimizedWindows, setMinimizedWindows] = useState<string[]>([]);
+
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Element;
       if (showStartMenu && 
-          !e.target.closest('.start-button') && 
-          !e.target.closest('.start-menu')) {
+          !target.closest('.start-button') && 
+          !target.closest('.start-menu')) {
         setShowStartMenu(false);
       }
     };
@@ -227,7 +267,6 @@ const WinXPPortfolio = () => {
     return () => window.removeEventListener('mousedown', handleClickOutside);
   }, [showStartMenu]);
 
-  // Update clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -238,7 +277,7 @@ const WinXPPortfolio = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const defaultIcons = [
+  const defaultIcons: Icon[] = [
     {
       id: 'about_me',
       title: 'About Me',
@@ -354,7 +393,14 @@ With a combination of technical expertise, creative flair, and a passion for con
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
             >
-              <img src="/icons/github.png" alt="GitHub" className="w-16 h-16 pixelated" />
+              <Image 
+                src="/icons/github.png"
+                alt="Start"
+                width={60}
+                height={60}
+                className="pixelated"
+                draggable={false}
+              />
               <span className="text-sm text-blue-600">GitHub Profile</span>
             </a>
             <a 
@@ -363,7 +409,14 @@ With a combination of technical expertise, creative flair, and a passion for con
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
             >
-              <img src="/icons/Linkedin.png" alt="LinkedIn" className="w-16 h-16 pixelated" />
+              <Image 
+                src="/icons/linkedin.png"
+                alt="Start"
+                width={60}
+                height={60}
+                className="pixelated"
+                draggable={false}
+              />
               <span className="text-sm text-blue-600">LinkedIn Profile</span>
             </a>
           </div>
@@ -380,7 +433,7 @@ With a combination of technical expertise, creative flair, and a passion for con
     }
   ];
 
-  const calculateInitialPosition = (id) => {
+  const calculateInitialPosition = (id: string): Position => {
     const cascade = openWindows.length * 30;
     return {
       x: 50 + cascade,
@@ -388,7 +441,7 @@ With a combination of technical expertise, creative flair, and a passion for con
     };
   };
 
-  const handleWindowOpen = (id) => {
+  const handleWindowOpen = (id: string): void => {
     if (!openWindows.includes(id)) {
       setOpenWindows([...openWindows, id]);
       setWindowPositions({
@@ -404,12 +457,16 @@ With a combination of technical expertise, creative flair, and a passion for con
   return (
     <div className="fixed inset-0 overflow-hidden">
       {/* Desktop Background */}
-      <img 
+      <Image 
         src="/bg.jpg" 
         alt="Windows XP Background" 
-        className="absolute inset-0 w-full h-full object-cover"
+        fill
+        className="object-cover"
+        priority
+        quality={100}
+        draggable={false}
+        unoptimized // Add this if you want to skip Next.js image optimization
       />
-
       {/* Desktop Icons Container */}
       <div className="absolute inset-0 z-10">
         <div className="grid grid-cols-1 auto-rows-min gap-6 p-6">
@@ -425,12 +482,14 @@ With a combination of technical expertise, creative flair, and a passion for con
                 setIsMaximized({ ...isMaximized, [icon.id]: true });
               }}
             >
-              <img 
-                src={icon.iconSrc} 
-                alt={icon.title}
-                className="w-12 h-12 pixelated group-hover:scale-105 transition-transform"
-                draggable="false"
-              />
+              <Image 
+  src={icon.iconSrc} 
+  alt={icon.title}
+  width={48}
+  height={48}
+  className="w-12 h-12 pixelated group-hover:scale-105 transition-transform"
+  draggable={false}
+/>
               <span className="text-white text-sm font-semibold text-shadow text-center">
                 {icon.title}
               </span>
@@ -440,46 +499,46 @@ With a combination of technical expertise, creative flair, and a passion for con
       </div>
 
       {/* Windows Container */}
-      <div className="absolute inset-0 z-20 pointer-events-none">
-        {openWindows.map((id) => {
-          const icon = defaultIcons.find(i => i.id === id);
-          if (minimizedWindows.includes(id)) return null;
+<div className="absolute inset-0 z-20 pointer-events-none">
+  {openWindows.map((id) => {
+    const icon = defaultIcons.find(i => i.id === id);
+    if (!icon || minimizedWindows.includes(id)) return null;
 
-          return (
-            <div key={id} className="pointer-events-auto">
-              <WinXPWindow
-                title={icon.title}
-                icon={icon.iconSrc}
-                isActive={activeWindow === id}
-                position={windowPositions[id] || { x: 0, y: 0 }}
-                onPositionChange={(newPos) => {
-                  setWindowPositions({
-                    ...windowPositions,
-                    [id]: newPos
-                  });
-                }}
-                isMaximized={isMaximized[id]}
-                onClose={() => {
-                  setOpenWindows(openWindows.filter(w => w !== id));
-                  if (activeWindow === id) setActiveWindow(null);
-                }}
-                onMinimize={() => {
-                  setMinimizedWindows([...minimizedWindows, id]);
-                  if (activeWindow === id) setActiveWindow(null);
-                }}
-                onMaximize={() => {
-                  setIsMaximized({
-                    ...isMaximized,
-                    [id]: !isMaximized[id]
-                  });
-                }}
-              >
-                {icon.content}
-              </WinXPWindow>
-            </div>
-          );
-        })}
+    return (
+      <div key={id} className="pointer-events-auto">
+        <WinXPWindow
+          title={icon.title}
+          icon={icon.iconSrc}
+          isActive={activeWindow === id}
+          position={windowPositions[id] || { x: 0, y: 0 }}
+          onPositionChange={(newPos) => {
+            setWindowPositions({
+              ...windowPositions,
+              [id]: newPos
+            });
+          }}
+          isMaximized={isMaximized[id]}
+          onClose={() => {
+            setOpenWindows(openWindows.filter(w => w !== id));
+            if (activeWindow === id) setActiveWindow(null);
+          }}
+          onMinimize={() => {
+            setMinimizedWindows([...minimizedWindows, id]);
+            if (activeWindow === id) setActiveWindow(null);
+          }}
+          onMaximize={() => {
+            setIsMaximized({
+              ...isMaximized,
+              [id]: !isMaximized[id]
+            });
+          }}
+        >
+          {icon.content}
+        </WinXPWindow>
       </div>
+    );
+  })}
+</div>
 
       {/* Taskbar */}
       <div className="absolute bottom-0 left-0 right-0 z-30 h-10 bg-gradient-to-r from-[#1E5799] to-[#2989D8] 
@@ -495,12 +554,14 @@ With a combination of technical expertise, creative flair, and a passion for con
             setShowStartMenu(!showStartMenu);
           }}
         >
-          <img 
-            src="/icons/start.png" 
-            alt="Start" 
-            className="h-6 pixelated" 
-            draggable="false"
-          />
+          <Image 
+        src="/icons/start.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
           <span className="text-white font-bold">Start</span>
         </button>
 
@@ -508,41 +569,52 @@ With a combination of technical expertise, creative flair, and a passion for con
         <div className="border-l border-[#2573BC] mx-2 h-full" />
 
         {/* Open Windows */}
-        <div className="flex-1 flex gap-1 overflow-x-auto">
-          {openWindows.map((id) => {
-            const icon = defaultIcons.find(i => i.id === id);
-            return (
-              <button
-                key={id}
-                className={`
-                  flex-shrink-0 px-2 h-8 flex items-center gap-2 rounded-sm
-                  min-w-[120px] max-w-[200px]
-                  ${activeWindow === id ? 'bg-[#2573BC]' : 'hover:bg-[#3C8ADB]'}
-                  ${minimizedWindows.includes(id) ? 'opacity-70' : ''}
-                  transition-all duration-100
-                `}
-                onClick={() => {
-                  if (minimizedWindows.includes(id)) {
-                    setMinimizedWindows(minimizedWindows.filter(w => w !== id));
-                  }
-                  setActiveWindow(id);
-                }}
-              >
-                <img 
-                  src={icon.iconSrc} 
-                  alt="" 
-                  className="w-4 h-4 pixelated"
-                  draggable="false"
-                />
-                <span className="text-white text-sm truncate">{icon.title}</span>
-              </button>
-            );
-          })}
-        </div>
+<div className="flex-1 flex gap-1 overflow-x-auto">
+  {openWindows.map((id) => {
+    const icon = defaultIcons.find(i => i.id === id);
+    if (!icon) return null;
+
+    return (
+      <button
+        key={id}
+        className={`
+          flex-shrink-0 px-2 h-8 flex items-center gap-2 rounded-sm
+          min-w-[120px] max-w-[200px]
+          ${activeWindow === id ? 'bg-[#2573BC]' : 'hover:bg-[#3C8ADB]'}
+          ${minimizedWindows.includes(id) ? 'opacity-70' : ''}
+          transition-all duration-100
+        `}
+        onClick={() => {
+          if (minimizedWindows.includes(id)) {
+            setMinimizedWindows(minimizedWindows.filter(w => w !== id));
+          }
+          setActiveWindow(id);
+        }}
+      >
+        <Image 
+          src={icon.iconSrc} 
+          alt={icon.title}
+          width={16}
+          height={16}
+          className="w-4 h-4 pixelated"
+          draggable={false}
+        />
+        <span className="text-white text-sm truncate">{icon.title}</span>
+      </button>
+    );
+  })}
+</div>
 
         {/* System Tray */}
         <div className="flex items-center h-full bg-gradient-to-r from-[#0F256E] to-[#0F256E] px-2">
-          <img src="/icons/volume.png" className="w-4 h-4 pixelated mr-2" draggable="false" />
+        <Image 
+        src="/icons/volume.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
           <span className="text-white text-sm">{currentTime}</span>
         </div>
       </div>
@@ -560,11 +632,13 @@ With a combination of technical expertise, creative flair, and a passion for con
     {/* User Profile Section */}
     <div className="h-20 bg-gradient-to-r from-[#1E5799] to-[#2989D8] p-4 
                    rounded-t-lg flex items-center gap-4">
-      <img 
-        src="/icons/user.png" 
-        alt="User" 
-        className="w-12 h-12 rounded-full pixelated"
-        draggable="false"
+      <Image 
+        src="/icons/user.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
       />
       <span className="text-white font-bold">Ali Saad (SPeeDo)</span>
     </div>
@@ -583,12 +657,14 @@ With a combination of technical expertise, creative flair, and a passion for con
               setShowStartMenu(false);
             }}
           >
-            <img 
-              src={icon.iconSrc} 
-              alt="" 
-              className="w-6 h-6 pixelated"
-              draggable="false"
-            />
+            <Image 
+  src={icon.iconSrc} 
+  alt={icon.title}
+  width={24}
+  height={24}
+  className="w-6 h-6 pixelated"
+  draggable={false}
+/>
             <span className="text-sm text-left">{icon.title}</span>
           </button>
         ))}
@@ -600,34 +676,40 @@ With a combination of technical expertise, creative flair, and a passion for con
         <div className="space-y-1">
           <button className="w-full text-left text-sm p-2 hover:bg-[#2989D8] hover:text-white rounded">
             <div className="flex items-center gap-2">
-              <img 
-                src="/icons/recent.png" 
-                alt="" 
-                className="w-6 h-6 pixelated"
-                draggable="false"
-              />
+            <Image 
+        src="/icons/recent.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
               <span>Recent Projects</span>
             </div>
           </button>
           <button className="w-full text-left text-sm p-2 hover:bg-[#2989D8] hover:text-white rounded">
             <div className="flex items-center gap-2">
-              <img 
-                src="/icons/documents.png" 
-                alt="" 
-                className="w-6 h-6 pixelated"
-                draggable="false"
-              />
+            <Image 
+        src="/icons/documents.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
               <span>My Documents</span>
             </div>
           </button>
           <button className="w-full text-left text-sm p-2 hover:bg-[#2989D8] hover:text-white rounded">
             <div className="flex items-center gap-2">
-              <img 
-                src="/icons/pictures.png" 
-                alt="" 
-                className="w-6 h-6 pixelated"
-                draggable="false"
-              />
+            <Image 
+        src="/icons/pictures.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
               <span>My Pictures</span>
             </div>
           </button>
@@ -639,21 +721,25 @@ With a combination of technical expertise, creative flair, and a passion for con
     <div className="border-t border-gray-300 bg-[#EFF3F7] p-2">
       <div className="flex justify-between">
         <button className="flex items-center gap-2 p-2 hover:bg-[#2989D8] hover:text-white rounded">
-          <img 
-            src="/icons/logoff.png" 
-            alt="" 
-            className="w-6 h-6 pixelated"
-            draggable="false"
-          />
+        <Image 
+        src="/icons/logoff.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
           <span className="text-sm">Log Off</span>
         </button>
         <button className="flex items-center gap-2 p-2 hover:bg-[#2989D8] hover:text-white rounded">
-          <img 
-            src="/icons/shutdown.png" 
-            alt="" 
-            className="w-6 h-6 pixelated"
-            draggable="false"
-          />
+        <Image 
+        src="/icons/shutdown.png"
+        alt="Start"
+        width={24}
+        height={24}
+        className="pixelated"
+        draggable={false}
+      />
           <span className="text-sm">Shut Down</span>
         </button>
       </div>
