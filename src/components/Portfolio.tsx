@@ -631,9 +631,9 @@ const calculateInitialPosition = (id: string): Position => {
       <Image 
         src="/icons/user.png"
         alt="Start"
-        width={24}
-        height={24}
-        className="pixelated"
+        width={60}
+        height={60}
+        className="pixelated rounded-full"
         draggable={false}
       />
       <span className="text-white font-bold">Ali Saad (SPeeDo)</span>
