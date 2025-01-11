@@ -433,7 +433,8 @@ With a combination of technical expertise, creative flair, and a passion for con
     }
   ];
 
-  const calculateInitialPosition = (id: string): Position => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const calculateInitialPosition = (id: string): Position => {
     const cascade = openWindows.length * 30;
     return {
       x: 50 + cascade,
@@ -620,15 +621,10 @@ With a combination of technical expertise, creative flair, and a passion for con
       </div>
 
       {/* Start Menu */}
-      {showStartMenu && (
-        <div className="absolute bottom-10 left-0 z-50 w-80 bg-white rounded-t-lg 
-                      shadow-2xl start-menu origin-bottom"
-             onClick={(e) => e.stopPropagation()}>
-          {/* Start Menu */}
 {showStartMenu && (
   <div className="absolute bottom-10 left-0 z-50 w-80 bg-white rounded-t-lg 
                 shadow-2xl start-menu origin-bottom"
-       onClick={(e) => e.stopPropagation()}>
+       onClick={(e: React.MouseEvent) => e.stopPropagation()}>
     {/* User Profile Section */}
     <div className="h-20 bg-gradient-to-r from-[#1E5799] to-[#2989D8] p-4 
                    rounded-t-lg flex items-center gap-4">
@@ -642,7 +638,6 @@ With a combination of technical expertise, creative flair, and a passion for con
       />
       <span className="text-white font-bold">Ali Saad (SPeeDo)</span>
     </div>
-
     {/* Programs Section */}
     <div className="flex h-[400px]">
       {/* Left Column - Main Programs */}
@@ -658,13 +653,13 @@ With a combination of technical expertise, creative flair, and a passion for con
             }}
           >
             <Image 
-  src={icon.iconSrc} 
-  alt={icon.title}
-  width={24}
-  height={24}
-  className="w-6 h-6 pixelated"
-  draggable={false}
-/>
+              src={icon.iconSrc} 
+              alt={icon.title}
+              width={24}
+              height={24}
+              className="w-6 h-6 pixelated"
+              draggable={false}
+            />
             <span className="text-sm text-left">{icon.title}</span>
           </button>
         ))}
@@ -746,8 +741,6 @@ With a combination of technical expertise, creative flair, and a passion for con
     </div>
   </div>
 )}
-        </div>
-      )}
     </div>
   );
 };
