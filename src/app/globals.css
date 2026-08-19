@@ -31,7 +31,7 @@ body {
 
 @keyframes startMenuOpen {
   from {
-    transform: translateY(100%) scaleY(0.5);
+    transform: translateY(100%) scaleY(0.3);
     opacity: 0;
   }
   to {
@@ -106,18 +106,4 @@ body {
 .xp-button:active {
   background: linear-gradient(180deg, #cce3fc 0%, #84b5f3 100%);
   box-shadow: inset 1px 1px 1px rgba(0,0,0,0.2);
-}.start-menu {
-  animation: startMenuOpen 0.2s ease-out;
-  transform-origin: bottom;
-}
-
-@keyframes startMenuOpen {
-  from {
-    transform: translateY(100%) scaleY(0.3);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scaleY(1);
-    opacity: 1;
-  }
 }

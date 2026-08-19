@@ -409,8 +409,8 @@ With a combination of technical expertise, creative flair, and a passion for con
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
             >
-              <Image 
-                src="/icons/linkedin.png"
+              <Image
+                src="/icons/Linkedin.png"
                 alt="Start"
                 width={60}
                 height={60}
@@ -609,7 +609,7 @@ const calculateInitialPosition = (id: string): Position => {
         {/* System Tray */}
         <div className="flex items-center h-full bg-gradient-to-r from-[#0F256E] to-[#0F256E] px-2">
         <Image 
-        src="/icons/volume.png"
+        src="/icons/Volume.png"
         alt="Start"
         width={24}
         height={24}
