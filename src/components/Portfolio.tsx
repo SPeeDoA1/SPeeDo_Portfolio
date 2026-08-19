@@ -3,6 +3,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Code, Mail } from 'lucide-react';
 import Image from 'next/image';
+import { profile } from '@/data/profile';
+import { aboutContent } from '@/data/about';
+import { projects } from '@/data/projects';
+import { skillCategories } from '@/data/skills';
+import { contactLinks, contactInfo } from '@/data/contact';
 
 interface Position {
   x: number;
@@ -284,27 +289,19 @@ const WinXPPortfolio: React.FC = () => {
       iconSrc: '/icons/notepad.png',
       content: (
         <div className="p-6 space-y-4">
-          <h2 className="text-lg font-bold">Ali Saad</h2>
-          <h3 className="text-md">Web Developer & Cybersecurity Enthusiast</h3>
+          <h2 className="text-lg font-bold">{aboutContent.heading}</h2>
+          <h3 className="text-md">{aboutContent.subheading}</h3>
           <p className="text-sm">
-          Hi, I’m Ali Saad, a 19-year-old cybersecurity student from Duhok, Iraq, currently studying at Northern Technical University (NTU). I am passionate about cybersecurity, web development, and creative arts, and I strive to expand my skills and knowledge in these areas.
-
-In cybersecurity, I am an active CTF player on TryHackMe, proudly ranking among the Top 5 in Iraq and the Top 1% globally. I have also reached the finals of the prestigious Iraqi Minister of Cybersecurity Exam, demonstrating my expertise and dedication to the field.
-
-Beyond cybersecurity, I am skilled in video editing and graphic designing, with hands-on experience in tools like Adobe Premiere, Photoshop, and After Effects. My creativity shines through the engaging and high-quality content I produce.
-
-I am also diving into the world of web development and have already created projects using Next.js, React, PHP, and other technologies. This journey allows me to blend my technical skills with my creative talents, building functional and visually appealing websites.
-
-With a combination of technical expertise, creative flair, and a passion for continuous learning, I am eager to showcase my work and make a meaningful impact in both cybersecurity and the tech industry.
+            {aboutContent.bioParagraphs.join(' ')}
           </p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
-              <span className="text-sm">ali2005saad12@gmail.com</span>
+              <span className="text-sm">{profile.email}</span>
             </div>
             <div className="flex items-center gap-2">
               <Code className="w-4 h-4" />
-              <span className="text-sm"><p> It takes 20 years to build a reputation and five minutes to ruin it. </p></span>
+              <span className="text-sm"><p> {aboutContent.quote} </p></span>
             </div>
           </div>
         </div>
@@ -316,32 +313,10 @@ With a combination of technical expertise, creative flair, and a passion for con
       iconSrc: '/icons/projects.png',
       content: (
         <div className="p-4 grid gap-4">
-          {[
-            { 
-              title: 'Rubber Duckey V5',
-              desc: '16 Ready-to-Use HID Scripts Built with Arduino',
-              tech: ['Arduino', 'C++', 'Python','Bash']
-            },
-            { 
-              title: 'NTU Exam System',
-              desc: 'Elevating Exam and Homework Management for NTU Students',
-              tech: ['PHP', 'MySQL', 'JavaScript']
-            },
-            {
-              title: 'BreachTracker',
-              desc: 'Detect Breaches, Secure Credentials, Take Control',
-              tech: ['PHP', 'MySQL', 'JavaScript']
-            },
-            { 
-              title: 'SunWay KinderGarten',
-              desc: 'Smart Childcare, Attendance, and Financial Management',
-              tech: ['React', 'NextJS', 'MySQL']
-            },
-            
-          ].map((project) => (
+          {projects.map((project) => (
             <div key={project.title} className="border rounded p-4 hover:bg-blue-50 transition-colors">
               <h3 className="font-bold">{project.title}</h3>
-              <p className="text-sm text-gray-600">{project.desc}</p>
+              <p className="text-sm text-gray-600">{project.description}</p>
               <div className="flex gap-2 mt-2">
                 {project.tech.map(tech => (
                   <span key={tech} className="text-xs bg-blue-100 px-2 py-1 rounded">
@@ -360,11 +335,7 @@ With a combination of technical expertise, creative flair, and a passion for con
       iconSrc: '/icons/skills.png',
       content: (
         <div className="p-6 space-y-6">
-          {[
-            { category: 'CyberSecurity', skills: ['CTF', 'SOC Analysis', 'PenTester', 'Digital Forensics'] },
-            { category: 'Web', skills: ['React', 'Next.js', 'PHP', 'MySQL','MongoDB'] },
-            { category: 'Programming Language', skills: ['C++', 'Python', 'Bash'] },
-          ].map((group) => (
+          {skillCategories.map((group) => (
             <div key={group.category}>
               <h3 className="font-bold mb-2">{group.category}</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -387,45 +358,32 @@ With a combination of technical expertise, creative flair, and a passion for con
       content: (
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-6">
-            <a 
-              href="https://github.com/SPeeDoA1" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
-            >
-              <Image 
-                src="/icons/github.png"
-                alt="Start"
-                width={60}
-                height={60}
-                className="pixelated"
-                draggable={false}
-              />
-              <span className="text-sm text-blue-600">GitHub Profile</span>
-            </a>
-            <a 
-              href="https://www.linkedin.com/in/speedoa1/" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
-            >
-              <Image
-                src="/icons/Linkedin.png"
-                alt="Start"
-                width={60}
-                height={60}
-                className="pixelated"
-                draggable={false}
-              />
-              <span className="text-sm text-blue-600">LinkedIn Profile</span>
-            </a>
+            {contactLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
+              >
+                <Image
+                  src={link.icon}
+                  alt="Start"
+                  width={60}
+                  height={60}
+                  className="pixelated"
+                  draggable={false}
+                />
+                <span className="text-sm text-blue-600">{link.label}</span>
+              </a>
+            ))}
           </div>
           <div className="mt-6">
             <h3 className="font-bold mb-2">Contact Information</h3>
             <div className="space-y-2 text-sm">
-              <p>📧 ali2005saad12@gmail.com</p>
-              <p>📱 +964 770 161 3172</p>
-              <p>📍 Iraq, Duhok</p>
+              <p>📧 {contactInfo.email}</p>
+              <p>📱 {contactInfo.phone}</p>
+              <p>📍 {contactInfo.location}</p>
             </div>
           </div>
         </div>
@@ -636,7 +594,7 @@ const calculateInitialPosition = (id: string): Position => {
         className="pixelated rounded-full"
         draggable={false}
       />
-      <span className="text-white font-bold">Ali Saad (SPeeDo)</span>
+      <span className="text-white font-bold">{profile.name} ({profile.handle})</span>
     </div>
     {/* Programs Section */}
     <div className="flex h-[400px]">
