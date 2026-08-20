@@ -9,6 +9,7 @@ import Taskbar from './xp/Taskbar';
 import StartMenu from './xp/StartMenu';
 import RunDialog from './xp/RunDialog';
 import ShutdownDialog, { type ShutdownAction } from './xp/ShutdownDialog';
+import KeyboardShortcuts from './xp/KeyboardShortcuts';
 
 type PowerState = 'on' | 'standby' | 'off' | 'restarting';
 type BootPhase = 'unknown' | 'booting' | 'ready';
@@ -70,6 +71,17 @@ export default function Portfolio() {
   }, [showStartMenu]);
 
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (showRunDialog) setShowRunDialog(false);
+      else if (showShutdownDialog) setShowShutdownDialog(false);
+      else if (showStartMenu) setShowStartMenu(false);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showStartMenu, showRunDialog, showShutdownDialog]);
+
+  useEffect(() => {
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -112,6 +124,7 @@ export default function Portfolio() {
     <ThemeProvider>
       <WindowManagerProvider>
         <div className="fixed inset-0 overflow-hidden">
+          <KeyboardShortcuts />
           <Desktop />
           <WindowManager />
           <Taskbar

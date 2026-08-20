@@ -158,11 +158,20 @@ export function useWindowManagerState(): WindowManagerApi {
   const [recentIds, setRecentIds] = useState<string[]>(() => loadFromStorage(STORAGE_KEYS.recentApps, []));
 
   const openWindow: WindowManagerApi['openWindow'] = (id, defaultSize, opts) => {
+    const viewport = typeof window !== 'undefined' ? { width: window.innerWidth, height: window.innerHeight } : null;
+    const isNarrowViewport = viewport !== null && viewport.width < 640;
+    const size =
+      viewport && defaultSize
+        ? {
+            width: Math.min(defaultSize.width, viewport.width - 20),
+            height: Math.min(defaultSize.height, viewport.height - 60),
+          }
+        : defaultSize;
     dispatch({
       type: 'OPEN',
       id,
-      size: defaultSize,
-      maximized: opts?.maximized,
+      size,
+      maximized: opts?.maximized ?? isNarrowViewport,
       initialPosition: savedPositions[id],
     });
     setRecentIds((prev) => {

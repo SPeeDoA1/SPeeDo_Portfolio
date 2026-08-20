@@ -70,7 +70,7 @@ export default function StartMenu({ onItemSelected, onOpenRun, onShutDown }: Sta
 
   return (
     <div
-      className="absolute bottom-10 left-0 z-50 w-80 bg-white rounded-t-lg
+      className="absolute bottom-10 left-0 z-50 w-80 max-w-[calc(100vw-8px)] bg-white rounded-t-lg
                 shadow-2xl start-menu origin-bottom"
       onClick={(e: React.MouseEvent) => e.stopPropagation()}
     >
