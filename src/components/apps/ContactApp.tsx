@@ -28,8 +28,12 @@ export default function ContactApp() {
       <div className="mt-6">
         <h3 className="font-bold mb-2">Contact Information</h3>
         <div className="space-y-2 text-sm">
-          <p>📧 {contactInfo.email}</p>
-          <p>📱 {contactInfo.phone}</p>
+          {contactInfo.emails.map((email) => (
+            <p key={email}>📧 {email}</p>
+          ))}
+          {contactInfo.phones.map((phone) => (
+            <p key={phone}>📱 {phone}</p>
+          ))}
           <p>📍 {contactInfo.location}</p>
         </div>
       </div>

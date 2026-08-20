@@ -33,7 +33,7 @@ export default function StartMenu({ onItemSelected }: StartMenuProps) {
       {/* Programs Section */}
       <div className="flex h-[400px]">
         {/* Left Column - Main Programs */}
-        <div className="w-3/5 p-2 space-y-1 bg-white">
+        <div className="w-3/5 p-2 space-y-1 bg-white overflow-y-auto">
           {applicationList.map((app) => (
             <button
               key={app.id}

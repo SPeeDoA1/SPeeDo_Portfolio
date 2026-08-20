@@ -7,7 +7,7 @@ export const contactLinks: ContactLink[] = [
 ];
 
 export const contactInfo: ContactInfo = {
-  email: profile.email,
-  phone: profile.phone,
+  emails: [...profile.emails],
+  phones: [...profile.phones],
   location: profile.location,
 };

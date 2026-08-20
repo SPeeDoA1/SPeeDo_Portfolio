@@ -3,6 +3,10 @@ import AboutApp from '@/components/apps/AboutApp';
 import ProjectsApp from '@/components/apps/ProjectsApp';
 import SkillsApp from '@/components/apps/SkillsApp';
 import ContactApp from '@/components/apps/ContactApp';
+import ExperienceApp from '@/components/apps/ExperienceApp';
+import AchievementsApp from '@/components/apps/AchievementsApp';
+import CertificationsApp from '@/components/apps/CertificationsApp';
+import ResumeApp from '@/components/apps/ResumeApp';
 
 const DEFAULT_SIZE = { width: 600, height: 400 };
 
@@ -19,7 +23,14 @@ export const applications: Record<string, ApplicationDefinition> = {
     title: 'My Projects',
     icon: '/icons/projects.png',
     component: ProjectsApp,
-    defaultSize: DEFAULT_SIZE,
+    defaultSize: { width: 640, height: 480 },
+  },
+  experience: {
+    id: 'experience',
+    title: 'Experience',
+    icon: '/icons/documents.png',
+    component: ExperienceApp,
+    defaultSize: { width: 620, height: 480 },
   },
   my_skills: {
     id: 'my_skills',
@@ -27,6 +38,28 @@ export const applications: Record<string, ApplicationDefinition> = {
     icon: '/icons/skills.png',
     component: SkillsApp,
     defaultSize: DEFAULT_SIZE,
+  },
+  achievements: {
+    id: 'achievements',
+    title: 'Achievements',
+    icon: '/icons/Certificate.png',
+    component: AchievementsApp,
+    defaultSize: DEFAULT_SIZE,
+  },
+  certifications: {
+    id: 'certifications',
+    title: 'Certificates',
+    icon: '/icons/Certificate.png',
+    component: CertificationsApp,
+    defaultSize: { width: 500, height: 400 },
+  },
+  resume: {
+    id: 'resume',
+    title: 'Resume',
+    icon: '/icons/documents.png',
+    component: ResumeApp,
+    defaultSize: { width: 420, height: 340 },
+    showOnDesktop: false,
   },
   contact: {
     id: 'contact',
@@ -38,3 +71,6 @@ export const applications: Record<string, ApplicationDefinition> = {
 };
 
 export const applicationList: ApplicationDefinition[] = Object.values(applications);
+export const desktopApplicationList: ApplicationDefinition[] = applicationList.filter(
+  (app) => app.showOnDesktop !== false
+);

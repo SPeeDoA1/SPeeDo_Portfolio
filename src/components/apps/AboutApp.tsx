@@ -1,6 +1,7 @@
-import { Code, Mail } from 'lucide-react';
+import { Code, GraduationCap, Mail } from 'lucide-react';
 import { profile } from '@/data/profile';
 import { aboutContent } from '@/data/about';
+import { education } from '@/data/education';
 
 export default function AboutApp() {
   return (
@@ -13,7 +14,13 @@ export default function AboutApp() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4" />
-          <span className="text-sm">{profile.email}</span>
+          <span className="text-sm">{profile.emails[0]}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-4 h-4" />
+          <span className="text-sm">
+            {education.degree}, {education.institution} ({education.status})
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <Code className="w-4 h-4" />

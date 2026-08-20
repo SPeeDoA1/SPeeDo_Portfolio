@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import DesktopIcon from './DesktopIcon';
-import { applicationList } from '@/lib/applications';
+import { desktopApplicationList } from '@/lib/applications';
 import { useWindowManager } from '@/context/WindowManagerContext';
 
 export default function Desktop() {
@@ -21,7 +21,7 @@ export default function Desktop() {
       />
       <div className="absolute inset-0 z-10">
         <div className="grid grid-cols-1 auto-rows-min gap-6 p-6">
-          {applicationList.map((app) => (
+          {desktopApplicationList.map((app) => (
             <DesktopIcon
               key={app.id}
               title={app.title}
