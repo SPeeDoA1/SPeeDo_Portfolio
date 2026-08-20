@@ -32,4 +32,6 @@ export function saveToStorage<T>(key: string, value: T): void {
 
 export const STORAGE_KEYS = {
   windowPositions: 'window-positions',
+  theme: 'theme',
+  desktopIconPositions: 'desktop-icon-positions',
 } as const;

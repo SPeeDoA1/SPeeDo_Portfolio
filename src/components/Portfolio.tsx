@@ -2,14 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { WindowManagerProvider } from '@/context/WindowManagerContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import Desktop from './xp/Desktop';
 import WindowManager from './xp/WindowManager';
 import Taskbar from './xp/Taskbar';
 import StartMenu from './xp/StartMenu';
+import RunDialog from './xp/RunDialog';
+import ShutdownDialog, { type ShutdownAction } from './xp/ShutdownDialog';
+
+type PowerState = 'on' | 'standby' | 'off' | 'restarting';
 
 export default function Portfolio() {
   const [showStartMenu, setShowStartMenu] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [showRunDialog, setShowRunDialog] = useState<boolean>(false);
+  const [showShutdownDialog, setShowShutdownDialog] = useState<boolean>(false);
+  const [powerState, setPowerState] = useState<PowerState>('on');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -35,18 +43,65 @@ export default function Portfolio() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (powerState !== 'restarting') return;
+    const timeout = setTimeout(() => setPowerState('on'), 1400);
+    return () => clearTimeout(timeout);
+  }, [powerState]);
+
+  const handleShutdownSelect = (action: ShutdownAction) => {
+    setShowShutdownDialog(false);
+    if (action === 'standby') setPowerState('standby');
+    if (action === 'turnoff') setPowerState('off');
+    if (action === 'restart') setPowerState('restarting');
+  };
+
   return (
-    <WindowManagerProvider>
-      <div className="fixed inset-0 overflow-hidden">
-        <Desktop />
-        <WindowManager />
-        <Taskbar
-          showStartMenu={showStartMenu}
-          onToggleStartMenu={() => setShowStartMenu((prev) => !prev)}
-          currentTime={currentTime}
-        />
-        {showStartMenu && <StartMenu onItemSelected={() => setShowStartMenu(false)} />}
-      </div>
-    </WindowManagerProvider>
+    <ThemeProvider>
+      <WindowManagerProvider>
+        <div className="fixed inset-0 overflow-hidden">
+          <Desktop />
+          <WindowManager />
+          <Taskbar
+            showStartMenu={showStartMenu}
+            onToggleStartMenu={() => setShowStartMenu((prev) => !prev)}
+            currentTime={currentTime}
+          />
+          {showStartMenu && (
+            <StartMenu
+              onItemSelected={() => setShowStartMenu(false)}
+              onOpenRun={() => setShowRunDialog(true)}
+              onShutDown={() => setShowShutdownDialog(true)}
+            />
+          )}
+          {showRunDialog && <RunDialog onClose={() => setShowRunDialog(false)} />}
+          {showShutdownDialog && (
+            <ShutdownDialog onClose={() => setShowShutdownDialog(false)} onSelect={handleShutdownSelect} />
+          )}
+          {powerState === 'standby' && (
+            <div
+              className="fixed inset-0 z-[300] bg-black/70 flex items-center justify-center cursor-pointer"
+              onClick={() => setPowerState('on')}
+            >
+              <p className="text-white text-sm">Click to wake this computer.</p>
+            </div>
+          )}
+          {powerState === 'off' && (
+            <div
+              className="fixed inset-0 z-[300] bg-black flex items-center justify-center cursor-pointer"
+              onClick={() => setPowerState('on')}
+            >
+              <p className="text-white text-lg">It is now safe to close this portfolio.</p>
+            </div>
+          )}
+          {powerState === 'restarting' && (
+            <div className="fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center gap-3">
+              <p className="text-white text-lg font-bold">SPeeDo XP</p>
+              <p className="text-gray-400 text-xs">Restarting...</p>
+            </div>
+          )}
+        </div>
+      </WindowManagerProvider>
+    </ThemeProvider>
   );
 }

@@ -43,7 +43,7 @@ export default function WindowManager() {
               onMaximize={() => toggleMaximizeWindow(id)}
               onFocus={() => focusWindow(id)}
             >
-              <AppComponent />
+              <AppComponent appId={id} />
             </Window>
           </div>
         );

@@ -13,12 +13,14 @@ export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime 
   const { openWindows, activeWindow, minimizedWindows, restoreWindow } = useWindowManager();
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-30 h-10 bg-gradient-to-r from-[#1E5799] to-[#2989D8]
-                  border-t-[3px] border-[#2573BC] flex items-center px-1">
+    <div
+      className="absolute bottom-0 left-0 right-0 z-30 h-10 border-t-[3px] flex items-center px-1"
+      style={{ background: 'var(--xp-taskbar-gradient)', borderTopColor: 'var(--xp-taskbar-border)' }}
+    >
       {/* Start Button */}
       <button
         className={`start-button h-8 flex items-center gap-2 px-2 rounded-sm
-          ${showStartMenu ? 'bg-[#2573BC]' : 'hover:bg-[#3C8ADB]'}
+          ${showStartMenu ? 'bg-[var(--xp-accent)]' : 'hover:bg-[var(--xp-accent)] hover:opacity-90'}
           transition-colors
         `}
         onClick={(e) => {
@@ -52,7 +54,7 @@ export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime 
               className={`
                 flex-shrink-0 px-2 h-8 flex items-center gap-2 rounded-sm
                 min-w-[120px] max-w-[200px]
-                ${activeWindow === id ? 'bg-[#2573BC]' : 'hover:bg-[#3C8ADB]'}
+                ${activeWindow === id ? 'bg-[var(--xp-accent)]' : 'hover:bg-[var(--xp-accent)] hover:opacity-90'}
                 ${minimizedWindows.includes(id) ? 'opacity-70' : ''}
                 transition-all duration-100
               `}

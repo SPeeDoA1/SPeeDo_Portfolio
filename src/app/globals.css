@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 /* ==========================================================================
+   Theme tokens — defaults match the Windows XP Blue (Luna) theme.
+   Overridden at runtime by ThemeContext via document.documentElement.
+   ========================================================================== */
+
+:root {
+  --xp-titlebar-active: linear-gradient(to right, #1E5799, #2989D8, #1E5799);
+  --xp-titlebar-inactive: linear-gradient(to right, #969696, #ADADAD, #969696);
+  --xp-taskbar-gradient: linear-gradient(to right, #1E5799, #2989D8);
+  --xp-taskbar-border: #2573BC;
+  --xp-start-gradient: linear-gradient(to bottom, #4C9A2A, #2D6A0F);
+  --xp-accent: #2573BC;
+  --xp-window-border: #1E5799;
+}
+
+/* ==========================================================================
    Base — cross-cutting utilities used across desktop, windows, and taskbar
    ========================================================================== */
 
@@ -32,7 +47,7 @@ body {
    ========================================================================== */
 
 .window-border {
-  border: 1px solid #1E5799;
+  border: 1px solid var(--xp-window-border);
   border-radius: 8px 8px 0 0;
   box-shadow:
     inset 1px 1px 0 #fff,

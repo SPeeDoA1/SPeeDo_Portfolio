@@ -1,21 +1,82 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import type { Position } from '@/types/window';
 
 interface DesktopIconProps {
   title: string;
   iconSrc: string;
+  position: Position;
+  onPositionChange: (position: Position) => void;
+  isSelected: boolean;
+  onSelect: () => void;
   onOpen: () => void;
-  onOpenMaximized: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
 }
 
-export default function DesktopIcon({ title, iconSrc, onOpen, onOpenMaximized }: DesktopIconProps) {
+export default function DesktopIcon({
+  title,
+  iconSrc,
+  position,
+  onPositionChange,
+  isSelected,
+  onSelect,
+  onOpen,
+  onContextMenu,
+}: DesktopIconProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffset = useRef<Position>({ x: 0, y: 0 });
+  const movedRef = useRef(false);
+
+  const startDrag = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    onSelect();
+    movedRef.current = false;
+    dragOffset.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    setIsDragging(true);
+  };
+
+  const onDrag = useCallback(
+    (e: MouseEvent) => {
+      movedRef.current = true;
+      const newX = Math.max(0, e.clientX - dragOffset.current.x);
+      const newY = Math.max(0, e.clientY - dragOffset.current.y - 40);
+      onPositionChange({ x: newX, y: Math.max(0, newY) });
+    },
+    [onPositionChange]
+  );
+
+  const stopDrag = useCallback(() => setIsDragging(false), []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('mouseup', stopDrag);
+    return () => {
+      window.removeEventListener('mousemove', onDrag);
+      window.removeEventListener('mouseup', stopDrag);
+    };
+  }, [isDragging, onDrag, stopDrag]);
+
   return (
     <button
-      className="flex flex-col items-center gap-2 p-3 rounded-lg
-                 hover:bg-white/10 active:bg-blue-500/30 group transition-colors
-                 w-24"
-      onClick={onOpen}
-      onDoubleClick={onOpenMaximized}
+      style={{ position: 'absolute', left: position.x, top: position.y }}
+      className={`flex flex-col items-center gap-1 p-2 rounded w-24 group transition-colors ${
+        isSelected ? 'bg-blue-500/40 outline outline-1 outline-dashed outline-white/80' : 'hover:bg-white/10'
+      }`}
+      onMouseDown={startDrag}
+      onClick={(e) => {
+        if (movedRef.current) {
+          e.preventDefault();
+          return;
+        }
+        onSelect();
+      }}
+      onDoubleClick={onOpen}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onSelect();
+        onContextMenu(e);
+      }}
     >
       <Image
         src={iconSrc}
@@ -25,9 +86,7 @@ export default function DesktopIcon({ title, iconSrc, onOpen, onOpenMaximized }:
         className="w-12 h-12 pixelated group-hover:scale-105 transition-transform"
         draggable={false}
       />
-      <span className="text-white text-sm font-semibold text-shadow text-center">
-        {title}
-      </span>
+      <span className="text-white text-sm font-semibold text-shadow text-center">{title}</span>
     </button>
   );
 }

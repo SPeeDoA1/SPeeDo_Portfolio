@@ -155,13 +155,8 @@ export default function Window({
     >
       {/* Title Bar */}
       <div
-        className={`
-          h-8 px-2 flex items-center justify-between cursor-grab
-          ${isActive
-            ? 'bg-gradient-to-r from-[#1E5799] via-[#2989D8] to-[#1E5799]'
-            : 'bg-gradient-to-r from-[#969696] via-[#ADADAD] to-[#969696]'}
-          rounded-t-lg select-none
-        `}
+        className="h-8 px-2 flex items-center justify-between cursor-grab rounded-t-lg select-none"
+        style={{ background: isActive ? 'var(--xp-titlebar-active)' : 'var(--xp-titlebar-inactive)' }}
         onMouseDown={startDrag}
         onClick={handleTitleBarClick}
       >
