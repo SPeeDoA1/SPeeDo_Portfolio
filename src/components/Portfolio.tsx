@@ -11,6 +11,9 @@ import RunDialog from './xp/RunDialog';
 import ShutdownDialog, { type ShutdownAction } from './xp/ShutdownDialog';
 
 type PowerState = 'on' | 'standby' | 'off' | 'restarting';
+type BootPhase = 'unknown' | 'booting' | 'ready';
+
+const BOOT_KEY = 'xp-portfolio:has-booted';
 
 export default function Portfolio() {
   const [showStartMenu, setShowStartMenu] = useState<boolean>(false);
@@ -18,6 +21,39 @@ export default function Portfolio() {
   const [showRunDialog, setShowRunDialog] = useState<boolean>(false);
   const [showShutdownDialog, setShowShutdownDialog] = useState<boolean>(false);
   const [powerState, setPowerState] = useState<PowerState>('on');
+  const [bootPhase, setBootPhase] = useState<BootPhase>('unknown');
+
+  useEffect(() => {
+    let alreadyBooted = false;
+    try {
+      alreadyBooted = Boolean(sessionStorage.getItem(BOOT_KEY));
+    } catch {
+      alreadyBooted = true;
+    }
+    if (alreadyBooted) {
+      setBootPhase('ready');
+      return;
+    }
+    setBootPhase('booting');
+    const timeout = setTimeout(() => {
+      try {
+        sessionStorage.setItem(BOOT_KEY, '1');
+      } catch {
+        // private browsing / storage disabled — booting once per tab is best-effort
+      }
+      setBootPhase('ready');
+    }, 1300);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const skipBoot = () => {
+    try {
+      sessionStorage.setItem(BOOT_KEY, '1');
+    } catch {
+      // ignore
+    }
+    setBootPhase('ready');
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

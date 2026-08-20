@@ -31,7 +31,15 @@ const ALL_PROGRAMS: { group: string; items: ProgramLink[] }[] = [
   { group: 'Portfolio Tools', items: [{ appId: 'command_prompt' }, { appId: 'resume', label: 'Resume Viewer' }, { appId: 'certifications' }] },
   { group: 'Developer Tools', items: [{ appId: 'my_projects', label: 'Projects' }, { appId: 'my_skills', label: 'Tech Stack' }] },
   { group: 'Accessories', items: [{ appId: 'about_me', label: 'About Me' }, { appId: 'experience' }, { appId: 'achievements' }] },
-  { group: 'System', items: [{ appId: 'control_panel' }, { appId: 'system_properties', label: 'System Information' }] },
+  {
+    group: 'System',
+    items: [
+      { appId: 'control_panel' },
+      { appId: 'system_properties', label: 'System Information' },
+      { appId: 'security_center', label: 'Security Center' },
+      { appId: 'network_connections', label: 'Network Connections' },
+    ],
+  },
 ];
 
 function ProgramRow({ link, onOpen }: { link: ProgramLink; onOpen: (appId: string) => void }) {
@@ -50,7 +58,7 @@ function ProgramRow({ link, onOpen }: { link: ProgramLink; onOpen: (appId: strin
 }
 
 export default function StartMenu({ onItemSelected, onOpenRun, onShutDown }: StartMenuProps) {
-  const { openWindow } = useWindowManager();
+  const { openWindow, recentIds } = useWindowManager();
   const [showAllPrograms, setShowAllPrograms] = useState(false);
   const [showLogOff, setShowLogOff] = useState(false);
 
@@ -118,6 +126,28 @@ export default function StartMenu({ onItemSelected, onOpenRun, onShutDown }: Sta
 
         {/* Right Column */}
         <div className="w-2/5 bg-[#EFF3F7] p-2 space-y-1 overflow-y-auto">
+          {recentIds.length > 0 && (
+            <>
+              <div className="text-xs font-bold text-gray-500 px-2 pt-1 pb-1">My Recent Documents</div>
+              {recentIds.map((id) => {
+                const app = applications[id];
+                if (!app) return null;
+                return (
+                  <button
+                    key={id}
+                    className="w-full text-left text-xs p-1.5 hover:bg-[var(--xp-accent)] hover:text-white rounded"
+                    onClick={() => open(id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Image src={app.icon} alt="" width={18} height={18} className="pixelated" draggable={false} />
+                      <span className="truncate">{app.title}</span>
+                    </div>
+                  </button>
+                );
+              })}
+              <div className="border-t border-gray-300 my-1" />
+            </>
+          )}
           <button
             className="w-full text-left text-sm p-2 hover:bg-[var(--xp-accent)] hover:text-white rounded"
             onClick={() => open('my_documents')}

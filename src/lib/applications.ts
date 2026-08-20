@@ -18,6 +18,8 @@ import CommandPromptApp from '@/components/apps/CommandPromptApp';
 import InternetExplorerApp from '@/components/apps/InternetExplorerApp';
 import HelpSupportApp from '@/components/apps/HelpSupportApp';
 import SearchApp from '@/components/apps/SearchApp';
+import SecurityCenterApp from '@/components/apps/SecurityCenterApp';
+import NetworkConnectionsApp from '@/components/apps/NetworkConnectionsApp';
 
 const DEFAULT_SIZE = { width: 600, height: 400 };
 
@@ -167,6 +169,24 @@ export const applications: Record<string, ApplicationDefinition> = {
     icon: '/icons/my_computer.png',
     component: SearchApp,
     defaultSize: { width: 380, height: 420 },
+    showOnDesktop: false,
+    showInStartMenu: false,
+  },
+  security_center: {
+    id: 'security_center',
+    title: 'Security Center',
+    icon: '/icons/skills.png',
+    component: SecurityCenterApp,
+    defaultSize: { width: 420, height: 400 },
+    showOnDesktop: false,
+    showInStartMenu: false,
+  },
+  network_connections: {
+    id: 'network_connections',
+    title: 'Network Connections',
+    icon: '/icons/my_network.png',
+    component: NetworkConnectionsApp,
+    defaultSize: { width: 420, height: 320 },
     showOnDesktop: false,
     showInStartMenu: false,
   },

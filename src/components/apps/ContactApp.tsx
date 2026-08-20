@@ -11,6 +11,7 @@ export default function ContactApp() {
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
+            title={`Open ${link.label}`}
             className="flex flex-col items-center gap-2 p-4 border rounded hover:bg-blue-50 transition-colors"
           >
             <Image

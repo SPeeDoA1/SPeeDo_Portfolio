@@ -34,4 +34,5 @@ export const STORAGE_KEYS = {
   windowPositions: 'window-positions',
   theme: 'theme',
   desktopIconPositions: 'desktop-icon-positions',
+  recentApps: 'recent-apps',
 } as const;

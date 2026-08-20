@@ -10,7 +10,8 @@ interface TaskbarProps {
 }
 
 export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime }: TaskbarProps) {
-  const { openWindows, activeWindow, minimizedWindows, restoreWindow } = useWindowManager();
+  const { openWindows, activeWindow, minimizedWindows, restoreWindow, openWindow } = useWindowManager();
+  const today = new Date().toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div
@@ -75,16 +76,26 @@ export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime 
       </div>
 
       {/* System Tray */}
-      <div className="flex items-center h-full bg-gradient-to-r from-[#0F256E] to-[#0F256E] px-2">
+      <div className="flex items-center gap-2 h-full bg-gradient-to-r from-[#0F256E] to-[#0F256E] px-2">
+        <button
+          onClick={() => openWindow('security_center', applications.security_center.defaultSize)}
+          title={'SPeeDo Security Center\nSystem protected'}
+          className="text-sm leading-none hover:opacity-80"
+        >
+          🛡️
+        </button>
         <Image
           src="/icons/Volume.png"
-          alt="Start"
+          alt="Volume"
           width={24}
           height={24}
           className="pixelated"
           draggable={false}
+          title="Volume"
         />
-        <span className="text-white text-sm">{currentTime}</span>
+        <span className="text-white text-sm" title={today}>
+          {currentTime}
+        </span>
       </div>
     </div>
   );

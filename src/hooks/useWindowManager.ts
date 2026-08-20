@@ -139,6 +139,7 @@ export interface WindowManagerApi {
   windowSizes: Record<string, Size>;
   isMaximized: Record<string, boolean>;
   minimizedWindows: string[];
+  recentIds: string[];
   openWindow: (id: string, defaultSize?: Size, opts?: { maximized?: boolean }) => void;
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -154,6 +155,7 @@ export function useWindowManagerState(): WindowManagerApi {
   const [savedPositions] = useState<Record<string, Position>>(() =>
     loadFromStorage(STORAGE_KEYS.windowPositions, {})
   );
+  const [recentIds, setRecentIds] = useState<string[]>(() => loadFromStorage(STORAGE_KEYS.recentApps, []));
 
   const openWindow: WindowManagerApi['openWindow'] = (id, defaultSize, opts) => {
     dispatch({
@@ -162,6 +164,11 @@ export function useWindowManagerState(): WindowManagerApi {
       size: defaultSize,
       maximized: opts?.maximized,
       initialPosition: savedPositions[id],
+    });
+    setRecentIds((prev) => {
+      const next = [id, ...prev.filter((existing) => existing !== id)].slice(0, 5);
+      saveToStorage(STORAGE_KEYS.recentApps, next);
+      return next;
     });
   };
 
@@ -245,6 +252,7 @@ export function useWindowManagerState(): WindowManagerApi {
     windowSizes,
     isMaximized,
     minimizedWindows,
+    recentIds,
     openWindow,
     closeWindow,
     minimizeWindow,
