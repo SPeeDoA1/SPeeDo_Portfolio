@@ -9,11 +9,14 @@ interface WindowProps {
   children: React.ReactNode;
   onMinimize: () => void;
   onMaximize: () => void;
+  onFocus: () => void;
   position: Position;
   onPositionChange: (position: Position) => void;
+  size: Size;
+  onSizeChange: (size: Size) => void;
   isMaximized: boolean;
   icon: string;
-  defaultSize?: Size;
+  zIndex: number;
 }
 
 export default function Window({
@@ -23,16 +26,18 @@ export default function Window({
   children,
   onMinimize,
   onMaximize,
+  onFocus,
   position,
   onPositionChange,
+  size,
+  onSizeChange,
   isMaximized,
   icon,
-  defaultSize = { width: 600, height: 400 },
+  zIndex,
 }: WindowProps) {
   const windowRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
-  const [size, setSize] = useState<Size>(defaultSize);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
   const [lastClickTime, setLastClickTime] = useState<number>(0);
@@ -82,11 +87,11 @@ export default function Window({
       newHeight = Math.max(200, Math.min(e.clientY - rect.top, window.innerHeight - rect.top - 40));
     }
 
-    setSize({
+    onSizeChange({
       width: newWidth,
       height: newHeight,
     });
-  }, [isResizing, isMaximized, resizeDirection, size.width, size.height]);
+  }, [isResizing, isMaximized, resizeDirection, size.width, size.height, onSizeChange]);
 
   const stopResize = useCallback(() => {
     setIsResizing(false);
@@ -132,6 +137,7 @@ export default function Window({
   return (
     <div
       ref={windowRef}
+      onMouseDownCapture={onFocus}
       className={`
         absolute animate-window-open window-border
         ${isMaximized ? 'inset-0' : ''}
@@ -139,11 +145,12 @@ export default function Window({
         ${isActive ? '' : 'opacity-90'}
         transition-opacity duration-200
       `}
-      style={isMaximized ? {} : {
+      style={isMaximized ? { zIndex } : {
         width: size.width,
         height: size.height,
         left: position.x,
         top: position.y,
+        zIndex,
       }}
     >
       {/* Title Bar */}

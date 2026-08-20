@@ -8,17 +8,20 @@ export default function WindowManager() {
     openWindows,
     activeWindow,
     windowPositions,
+    windowSizes,
     isMaximized,
     minimizedWindows,
     closeWindow,
     minimizeWindow,
+    focusWindow,
     toggleMaximizeWindow,
     moveWindow,
+    resizeWindow,
   } = useWindowManager();
 
   return (
     <div className="absolute inset-0 z-20 pointer-events-none">
-      {openWindows.map((id) => {
+      {openWindows.map((id, index) => {
         const app = applications[id];
         if (!app || minimizedWindows.includes(id)) return null;
         const AppComponent = app.component;
@@ -28,14 +31,17 @@ export default function WindowManager() {
             <Window
               title={app.title}
               icon={app.icon}
-              defaultSize={app.defaultSize}
+              zIndex={100 + index}
               isActive={activeWindow === id}
               position={windowPositions[id] || { x: 0, y: 0 }}
               onPositionChange={(newPos) => moveWindow(id, newPos)}
+              size={windowSizes[id] || app.defaultSize || { width: 600, height: 400 }}
+              onSizeChange={(newSize) => resizeWindow(id, newSize)}
               isMaximized={!!isMaximized[id]}
               onClose={() => closeWindow(id)}
               onMinimize={() => minimizeWindow(id)}
               onMaximize={() => toggleMaximizeWindow(id)}
+              onFocus={() => focusWindow(id)}
             >
               <AppComponent />
             </Window>

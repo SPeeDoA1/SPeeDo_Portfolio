@@ -5,7 +5,7 @@ import { applicationList } from '@/lib/applications';
 import { useWindowManager } from '@/context/WindowManagerContext';
 
 export default function Desktop() {
-  const { openWindow, setWindowMaximized } = useWindowManager();
+  const { openWindow } = useWindowManager();
 
   return (
     <>
@@ -26,11 +26,8 @@ export default function Desktop() {
               key={app.id}
               title={app.title}
               iconSrc={app.icon}
-              onOpen={() => openWindow(app.id)}
-              onOpenMaximized={() => {
-                openWindow(app.id);
-                setWindowMaximized(app.id, true);
-              }}
+              onOpen={() => openWindow(app.id, app.defaultSize)}
+              onOpenMaximized={() => openWindow(app.id, app.defaultSize, { maximized: true })}
             />
           ))}
         </div>

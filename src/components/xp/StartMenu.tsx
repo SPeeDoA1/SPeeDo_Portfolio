@@ -40,7 +40,7 @@ export default function StartMenu({ onItemSelected }: StartMenuProps) {
               className="w-full flex items-center gap-3 p-2 rounded hover:bg-[#2989D8]
                        hover:text-white transition-colors"
               onClick={() => {
-                openWindow(app.id);
+                openWindow(app.id, app.defaultSize);
                 onItemSelected();
               }}
             >
