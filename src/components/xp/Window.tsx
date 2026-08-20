@@ -50,7 +50,7 @@ export default function Window({
     setLastClickTime(currentTime);
   };
 
-  const startDrag = (e: React.MouseEvent) => {
+  const startDrag = (e: React.PointerEvent) => {
     if (isMaximized) return;
     if (e.target instanceof Element && e.target.closest('.window-controls')) return;
 
@@ -64,7 +64,7 @@ export default function Window({
     }
   };
 
-  const onDrag = useCallback((e: MouseEvent) => {
+  const onDrag = useCallback((e: PointerEvent) => {
     if (!isDragging || isMaximized) return;
 
     const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - size.width));
@@ -73,7 +73,7 @@ export default function Window({
     onPositionChange({ x: newX, y: newY });
   }, [isDragging, isMaximized, dragOffset.x, dragOffset.y, size.width, size.height, onPositionChange]);
 
-  const onResize = useCallback((e: MouseEvent) => {
+  const onResize = useCallback((e: PointerEvent) => {
     if (!isResizing || isMaximized || !windowRef.current) return;
 
     const rect = windowRef.current.getBoundingClientRect();
@@ -101,7 +101,7 @@ export default function Window({
     setIsDragging(false);
   }, []);
 
-  const startResize = useCallback((e: React.MouseEvent, direction: string) => {
+  const startResize = useCallback((e: React.PointerEvent, direction: string) => {
     if (isMaximized) return;
     e.stopPropagation();
     setIsResizing(true);
@@ -110,15 +110,15 @@ export default function Window({
 
   useEffect(() => {
     if (isDragging || isResizing) {
-      const handleMouseMove = isDragging ? onDrag : onResize;
-      const handleMouseUp = isDragging ? stopDrag : stopResize;
+      const handlePointerMove = isDragging ? onDrag : onResize;
+      const handlePointerUp = isDragging ? stopDrag : stopResize;
 
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('pointermove', handlePointerMove);
+      window.addEventListener('pointerup', handlePointerUp);
 
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('pointermove', handlePointerMove);
+        window.removeEventListener('pointerup', handlePointerUp);
       };
     }
   }, [isDragging, isResizing, onDrag, onResize, stopDrag, stopResize]);
@@ -155,9 +155,9 @@ export default function Window({
     >
       {/* Title Bar */}
       <div
-        className="h-8 px-2 flex items-center justify-between cursor-grab rounded-t-lg select-none"
+        className="h-8 px-2 flex items-center justify-between cursor-grab rounded-t-lg select-none touch-none"
         style={{ background: isActive ? 'var(--xp-titlebar-active)' : 'var(--xp-titlebar-inactive)' }}
-        onMouseDown={startDrag}
+        onPointerDown={startDrag}
         onClick={handleTitleBarClick}
       >
         <div className="flex items-center gap-2">
@@ -203,16 +203,16 @@ export default function Window({
       {!isMaximized && (
         <>
           <div
-            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
-            onMouseDown={(e) => startResize(e, 'se')}
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize touch-none"
+            onPointerDown={(e) => startResize(e, 'se')}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize"
-            onMouseDown={(e) => startResize(e, 's')}
+            className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize touch-none"
+            onPointerDown={(e) => startResize(e, 's')}
           />
           <div
-            className="absolute top-0 bottom-0 right-0 w-1 cursor-e-resize"
-            onMouseDown={(e) => startResize(e, 'e')}
+            className="absolute top-0 bottom-0 right-0 w-1 cursor-e-resize touch-none"
+            onPointerDown={(e) => startResize(e, 'e')}
           />
         </>
       )}

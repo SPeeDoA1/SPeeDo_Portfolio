@@ -27,7 +27,7 @@ export default function DesktopIcon({
   const dragOffset = useRef<Position>({ x: 0, y: 0 });
   const movedRef = useRef(false);
 
-  const startDrag = (e: React.MouseEvent) => {
+  const startDrag = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     onSelect();
     movedRef.current = false;
@@ -36,7 +36,7 @@ export default function DesktopIcon({
   };
 
   const onDrag = useCallback(
-    (e: MouseEvent) => {
+    (e: PointerEvent) => {
       movedRef.current = true;
       const newX = Math.max(0, e.clientX - dragOffset.current.x);
       const newY = Math.max(0, e.clientY - dragOffset.current.y - 40);
@@ -49,21 +49,21 @@ export default function DesktopIcon({
 
   useEffect(() => {
     if (!isDragging) return;
-    window.addEventListener('mousemove', onDrag);
-    window.addEventListener('mouseup', stopDrag);
+    window.addEventListener('pointermove', onDrag);
+    window.addEventListener('pointerup', stopDrag);
     return () => {
-      window.removeEventListener('mousemove', onDrag);
-      window.removeEventListener('mouseup', stopDrag);
+      window.removeEventListener('pointermove', onDrag);
+      window.removeEventListener('pointerup', stopDrag);
     };
   }, [isDragging, onDrag, stopDrag]);
 
   return (
     <button
       style={{ position: 'absolute', left: position.x, top: position.y }}
-      className={`flex flex-col items-center gap-1 p-2 rounded w-24 group transition-colors ${
+      className={`flex flex-col items-center gap-1 p-2 rounded w-24 group transition-colors touch-none ${
         isSelected ? 'bg-blue-500/40 outline outline-1 outline-dashed outline-white/80' : 'hover:bg-white/10'
       }`}
-      onMouseDown={startDrag}
+      onPointerDown={startDrag}
       onClick={(e) => {
         if (movedRef.current) {
           e.preventDefault();

@@ -92,6 +92,22 @@ export default function Portfolio() {
     if (action === 'restart') setPowerState('restarting');
   };
 
+  if (bootPhase !== 'ready') {
+    return (
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center gap-4">
+        {bootPhase === 'booting' && (
+          <>
+            <p className="text-white text-2xl font-bold tracking-wide">SPeeDo XP</p>
+            <p className="text-gray-400 text-xs">Professional Portfolio</p>
+            <button onClick={skipBoot} className="mt-6 text-[10px] text-gray-500 hover:text-gray-300 underline">
+              Skip
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider>
       <WindowManagerProvider>
