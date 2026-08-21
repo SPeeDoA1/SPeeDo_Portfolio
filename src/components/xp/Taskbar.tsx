@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { applications } from '@/lib/applications';
 import { useWindowManager } from '@/context/WindowManagerContext';
+import { isSoundMuted, playClick, setSoundMuted } from '@/lib/sound';
 
 interface TaskbarProps {
   showStartMenu: boolean;
   onToggleStartMenu: () => void;
   currentTime: string;
+  currentDate: string;
 }
 
-export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime }: TaskbarProps) {
+export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime, currentDate }: TaskbarProps) {
   const { openWindows, activeWindow, minimizedWindows, restoreWindow, openWindow } = useWindowManager();
-  const today = new Date().toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  // Starts false on both server and first client render (hydration-safe),
+  // then synced to the real persisted value after mount.
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    setMuted(isSoundMuted());
+  }, []);
+
+  const toggleMute = () => {
+    const next = !isSoundMuted();
+    setSoundMuted(next);
+    setMuted(next);
+    if (!next) playClick();
+  };
 
   return (
     <div
@@ -84,16 +99,22 @@ export default function Taskbar({ showStartMenu, onToggleStartMenu, currentTime 
         >
           🛡️
         </button>
-        <Image
-          src="/icons/Volume.png"
-          alt="Volume"
-          width={24}
-          height={24}
-          className="pixelated"
-          draggable={false}
-          title="Volume"
-        />
-        <span className="text-white text-sm" title={today}>
+        <button onClick={toggleMute} title={muted ? 'Unmute' : 'Mute'} className="relative">
+          <Image
+            src="/icons/Volume.png"
+            alt="Volume"
+            width={24}
+            height={24}
+            className={`pixelated ${muted ? 'opacity-40' : ''}`}
+            draggable={false}
+          />
+          {muted && (
+            <span className="absolute inset-0 flex items-center justify-center text-red-500 text-xs font-bold">
+              ×
+            </span>
+          )}
+        </button>
+        <span className="text-white text-sm" title={currentDate}>
           {currentTime}
         </span>
       </div>

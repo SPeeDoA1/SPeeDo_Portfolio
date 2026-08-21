@@ -5,20 +5,30 @@ import ContextMenu, { type ContextMenuItem } from './ContextMenu';
 import Dialog from './Dialog';
 import { applications, desktopApplicationList } from '@/lib/applications';
 import { useWindowManager } from '@/context/WindowManagerContext';
+import { useRecycleBin } from '@/context/RecycleBinContext';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/lib/storage';
 import { getDefaultIconPosition } from '@/lib/desktopLayout';
+import { playRecycle } from '@/lib/sound';
 import type { Position } from '@/types/window';
 
 type MenuState = { x: number; y: number; targetId?: string } | null;
 
 export default function Desktop() {
   const { openWindow } = useWindowManager();
-  const [positions, setPositions] = useState<Record<string, Position>>(() =>
-    loadFromStorage(STORAGE_KEYS.desktopIconPositions, {})
-  );
+  const { deletedIds, deleteApp } = useRecycleBin();
+  const visibleApps = desktopApplicationList.filter((app) => !deletedIds.includes(app.id));
+  // Starts empty on both server and first client render (so hydration always
+  // matches), then hydrated from localStorage in an effect after mount.
+  const [positions, setPositions] = useState<Record<string, Position>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menu, setMenu] = useState<MenuState>(null);
   const [properties, setProperties] = useState<{ title: string; message: string } | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = loadFromStorage<Record<string, Position>>(STORAGE_KEYS.desktopIconPositions, {});
+    if (Object.keys(saved).length > 0) setPositions(saved);
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => saveToStorage(STORAGE_KEYS.desktopIconPositions, positions), 400);
@@ -53,11 +63,15 @@ export default function Desktop() {
 
   const iconMenuItems = (id: string): ContextMenuItem[] => {
     const app = desktopApplicationList.find((a) => a.id === id);
+    const canDelete = id !== 'recycle_bin';
     return [
       { label: 'Open', onClick: () => open(id) },
       { label: 'Explore', onClick: () => open(id) },
       { separator: true, label: '' },
       { label: 'Create Shortcut', disabled: true },
+      canDelete
+        ? { label: 'Delete', onClick: () => setConfirmDeleteId(id) }
+        : { label: 'Delete', disabled: true },
       { separator: true, label: '' },
       {
         label: 'Properties',
@@ -91,7 +105,7 @@ export default function Desktop() {
           setMenu({ x: e.clientX, y: e.clientY });
         }}
       >
-        {desktopApplicationList.map((app, index) => (
+        {visibleApps.map((app, index) => (
           <DesktopIcon
             key={app.id}
             title={app.title}
@@ -121,6 +135,23 @@ export default function Desktop() {
           message={properties.message}
           variant="info"
           onClose={() => setProperties(null)}
+        />
+      )}
+
+      {confirmDeleteId && (
+        <Dialog
+          title="Confirm File Delete"
+          variant="question"
+          message={`Are you sure you want to send '${
+            desktopApplicationList.find((a) => a.id === confirmDeleteId)?.title ?? confirmDeleteId
+          }' to the Recycle Bin?`}
+          confirmLabel="Yes"
+          cancelLabel="No"
+          onConfirm={() => {
+            deleteApp(confirmDeleteId);
+            playRecycle();
+          }}
+          onClose={() => setConfirmDeleteId(null)}
         />
       )}
     </>

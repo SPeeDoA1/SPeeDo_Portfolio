@@ -35,4 +35,6 @@ export const STORAGE_KEYS = {
   theme: 'theme',
   desktopIconPositions: 'desktop-icon-positions',
   recentApps: 'recent-apps',
+  soundMuted: 'sound-muted',
+  recycleBin: 'recycle-bin',
 } as const;

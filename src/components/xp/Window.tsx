@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import type { Position, Size } from '@/types/window';
+import { playMaximize, playMinimize, playRestore } from '@/lib/sound';
 
 interface WindowProps {
   title: string;
@@ -42,10 +43,16 @@ export default function Window({
   const [resizeDirection, setResizeDirection] = useState<string | null>(null);
   const [lastClickTime, setLastClickTime] = useState<number>(0);
 
+  const handleMaximizeToggle = useCallback(() => {
+    if (isMaximized) playRestore();
+    else playMaximize();
+    onMaximize();
+  }, [isMaximized, onMaximize]);
+
   const handleTitleBarClick = () => {
     const currentTime = new Date().getTime();
     if (currentTime - lastClickTime < 300) {
-      onMaximize();
+      handleMaximizeToggle();
     }
     setLastClickTime(currentTime);
   };
@@ -127,6 +134,7 @@ export default function Window({
     const element = windowRef.current;
     if (!element) return;
 
+    playMinimize();
     element.classList.add('minimize-window');
     setTimeout(() => {
       onMinimize();
@@ -137,9 +145,9 @@ export default function Window({
   return (
     <div
       ref={windowRef}
-      onMouseDownCapture={onFocus}
+      onPointerDownCapture={onFocus}
       className={`
-        absolute animate-window-open window-border
+        absolute animate-window-open window-border flex flex-col overflow-hidden
         ${isMaximized ? 'inset-0' : ''}
         ${isDragging ? 'cursor-grabbing' : ''}
         ${isActive ? '' : 'opacity-90'}
@@ -155,7 +163,7 @@ export default function Window({
     >
       {/* Title Bar */}
       <div
-        className="h-8 px-2 flex items-center justify-between cursor-grab rounded-t-lg select-none touch-none"
+        className="h-8 px-2 flex items-center justify-between cursor-grab rounded-t-lg select-none touch-none shrink-0"
         style={{ background: isActive ? 'var(--xp-titlebar-active)' : 'var(--xp-titlebar-inactive)' }}
         onPointerDown={startDrag}
         onClick={handleTitleBarClick}
@@ -172,7 +180,7 @@ export default function Window({
             <Image src="/icons/Minimize.png" alt="Minimize" width={22} height={22} className="w-full h-full" draggable={false} />
           </button>
           <button
-            onClick={onMaximize}
+            onClick={handleMaximizeToggle}
             className="w-[22px] h-[22px] flex items-center justify-center bg-[#D1D1D1] hover:bg-[#E5E5E5] active:bg-[#CCCCCC] border border-[#FFFFFF99] rounded-sm"
           >
             <Image src="/icons/Maximize.png" alt="Maximize" width={22} height={22} className="w-full h-full" draggable={false} />
@@ -187,7 +195,7 @@ export default function Window({
       </div>
 
       {/* Menu Bar */}
-      <div className="h-6 bg-[#ECE9D8] border-b border-[#ACA899] px-2 flex items-center select-none">
+      <div className="h-6 bg-[#ECE9D8] border-b border-[#ACA899] px-2 flex items-center select-none shrink-0">
         <span className="text-sm text-[#444444] hover:underline cursor-default px-2">File</span>
         <span className="text-sm text-[#444444] hover:underline cursor-default px-2">Edit</span>
         <span className="text-sm text-[#444444] hover:underline cursor-default px-2">View</span>
@@ -195,7 +203,7 @@ export default function Window({
       </div>
 
       {/* Content */}
-      <div className="bg-[#FFFFFF] flex-1 overflow-auto win-select">
+      <div className="bg-[#FFFFFF] flex-1 min-h-0 overflow-auto win-select">
         {children}
       </div>
 

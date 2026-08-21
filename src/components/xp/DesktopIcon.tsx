@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { Position } from '@/types/window';
+import { snapToIconGrid } from '@/lib/desktopLayout';
 
 interface DesktopIconProps {
   title: string;
@@ -26,6 +27,7 @@ export default function DesktopIcon({
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef<Position>({ x: 0, y: 0 });
   const movedRef = useRef(false);
+  const latestPositionRef = useRef<Position>(position);
 
   const startDrag = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
@@ -40,12 +42,19 @@ export default function DesktopIcon({
       movedRef.current = true;
       const newX = Math.max(0, e.clientX - dragOffset.current.x);
       const newY = Math.max(0, e.clientY - dragOffset.current.y - 40);
-      onPositionChange({ x: newX, y: Math.max(0, newY) });
+      const next = { x: newX, y: Math.max(0, newY) };
+      latestPositionRef.current = next;
+      onPositionChange(next);
     },
     [onPositionChange]
   );
 
-  const stopDrag = useCallback(() => setIsDragging(false), []);
+  const stopDrag = useCallback(() => {
+    setIsDragging(false);
+    if (movedRef.current) {
+      onPositionChange(snapToIconGrid(latestPositionRef.current));
+    }
+  }, [onPositionChange]);
 
   useEffect(() => {
     if (!isDragging) return;

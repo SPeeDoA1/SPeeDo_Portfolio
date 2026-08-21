@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useState } from 'react';
 import type { Position, Size, WindowInstance, WindowManagerState } from '@/types/window';
 import { getCascadePosition, clampToViewport } from '@/lib/windowLayout';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from '@/lib/storage';
+import { playClose, playOpen } from '@/lib/sound';
 
 const DEFAULT_SIZE: Size = { width: 600, height: 400 };
 const PERSIST_DEBOUNCE_MS = 400;
@@ -179,9 +180,13 @@ export function useWindowManagerState(): WindowManagerApi {
       saveToStorage(STORAGE_KEYS.recentApps, next);
       return next;
     });
+    playOpen();
   };
 
-  const closeWindow = (id: string) => dispatch({ type: 'CLOSE', id });
+  const closeWindow = (id: string) => {
+    dispatch({ type: 'CLOSE', id });
+    playClose();
+  };
   const minimizeWindow = (id: string) => dispatch({ type: 'MINIMIZE', id });
   const restoreWindow = (id: string) => dispatch({ type: 'RESTORE', id });
   const focusWindow = (id: string) => dispatch({ type: 'FOCUS', id });
